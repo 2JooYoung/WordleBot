@@ -132,7 +132,7 @@ async def daily_post():
 async def on_ready():
     print(f"봇 로그인: {bot.user}")
     # 한국시간 오전 9시 = UTC 00:00
-    daily_post.change_interval(time=time(hour=0, minute=0))  # UTC 00:00 = KST 09:00
+    daily_post.change_interval(time=time(hour=1, minute=30))  # UTC 00:00 = KST 09:00
     daily_post.start()
 
 
