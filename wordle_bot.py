@@ -2,9 +2,11 @@ import discord
 from discord.ext import tasks
 import httpx
 import asyncio
+import re
 from datetime import date, datetime, time
 import pytz
 import os
+from deep_translator import GoogleTranslator
 
 # ===== 설정 =====
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")         # 디스코드 봇 토큰
@@ -30,6 +32,15 @@ async def get_todays_wordle_word():
         except Exception as e:
             print(f"Wordle 단어 가져오기 실패: {e}")
             return None
+
+
+# ===== 한국어 번역 =====
+def translate_to_korean(text: str) -> str:
+    try:
+        return GoogleTranslator(source='en', target='ko').translate(text)
+    except Exception as e:
+        print(f"번역 실패: {e}")
+        return None
 
 
 # ===== 단어 뜻/예문 가져오기 (Merriam-Webster) =====
@@ -63,8 +74,7 @@ async def get_definition(word: str):
                                 for dt in dt_list:
                                     if dt[0] == "vis":
                                         raw = dt[1][0].get("t", "")
-                                        # {it}, {/it} 같은 태그 제거
-                                        clean = raw.replace("{it}", "").replace("{/it}", "").replace("{ldquo}", '"').replace("{rdquo}", '"')
+                                        clean = re.sub(r'\{[^}]+\}', '', raw)
                                         example = clean
                                         break
                                 if example:
@@ -95,6 +105,9 @@ async def post_wordle():
 
     meaning, example = await get_definition(word)
 
+    # 한국어 번역
+    meaning_kr = translate_to_korean(meaning) if meaning else None
+
     # 메시지 구성
     lines = [
         f"🟩 **오늘의 Wordle: `{word}`**",
@@ -102,8 +115,10 @@ async def post_wordle():
     ]
 
     if meaning:
-        lines.append(f"📖 **뜻:** {meaning}")
-    else:
+        lines.append(f"📖 **뜻 (EN):** {meaning}")
+    if meaning_kr:
+        lines.append(f"📖 **뜻 (KR):** {meaning_kr}")
+    if not meaning:
         lines.append("📖 **뜻:** (정보 없음)")
 
     if example:
@@ -120,7 +135,7 @@ async def post_wordle():
 
 
 # ===== 매일 정해진 시간에 실행 =====
-@tasks.loop(time=POST_TIME)  # UTC 기준이므로 아래에서 timezone 보정
+@tasks.loop(time=POST_TIME)
 async def daily_post():
     tz = pytz.timezone(TIMEZONE)
     now = datetime.now(tz)
@@ -131,8 +146,8 @@ async def daily_post():
 @bot.event
 async def on_ready():
     print(f"봇 로그인: {bot.user}")
-    # 한국시간 오전 9시 = UTC 00:00
-    daily_post.change_interval(time=time(hour=11, minute=30))  # UTC 00:00 = KST 09:00
+    # 한국시간 오후 8시 = UTC 11:00
+    daily_post.change_interval(time=time(hour=11, minute=0))  # UTC 11:00 = KST 20:00
     daily_post.start()
 
 
