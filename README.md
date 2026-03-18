@@ -14,7 +14,8 @@
 ```
 🟩 오늘의 Wordle: CRANE
 
-📖 뜻: a large machine used for lifting and moving heavy objects
+📖 뜻 (EN): a large machine used for lifting and moving heavy objects
+📖 뜻 (KR): 무거운 물체를 들어 올려 이동시키는 데 사용하는 큰 기계
 💬 예문: The crane lifted the steel beam into place.
 
 🔗 오늘의 Wordle 하러 가기
