@@ -23,7 +23,8 @@ bot = discord.Client(intents=intents)
 # ===== 오늘의 Wordle 단어 가져오기 =====
 async def get_todays_wordle_word():
     today = date.today().isoformat()
-    url = f"https://www.nytimes.com/svc/wordle/v2/{today}.json"
+    url = f"https://wordle-api.vercel.app/word?date={today}"
+    #url = f"https://www.nytimes.com/svc/wordle/v2/{today}.json"
     async with httpx.AsyncClient() as client:
         try:
             r = await client.get(url, timeout=10)
