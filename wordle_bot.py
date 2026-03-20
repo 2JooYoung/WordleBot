@@ -29,7 +29,11 @@ async def get_todays_wordle_word():
         try:
             r = await client.get(url, timeout=10)
             data = r.json()
-            return data.get("solution", "").upper()
+            word = data.get("word", "")
+            if word:
+                return word.upper()
+            return None
+            #return data.get("solution", "").upper()
         except Exception as e:
             print(f"Wordle 단어 가져오기 실패: {e}")
             return None
